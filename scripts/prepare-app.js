@@ -55,6 +55,9 @@ const accountCode = fs.readFileSync(path.join(__dirname, 'account-ui.js'), 'utf8
 /* 6b. Sign-in by username OR email; invited users cannot sign in until they accept */
 rep('login by email', "const u = S.users.find(x => (x.username || '').toLowerCase() === un);", "const u = S.users.find(x => (x.username || '').toLowerCase() === un) || S.users.find(x => un.includes('@') && (x.email || '').trim().toLowerCase() === un);");
 rep('invited login', "if (!u || !checkPw(u.pw, pw)) {", "if (u && u.status === 'INVITED') { L.err = 'This invitation has not been accepted yet. Click Accept invitation below and use the code from your email.'; return render(); }\n  if (!u || !checkPw(u.pw, pw)) {");
+/* 6b2. A fresh install has an owner but no company yet: let the owner sign in and create one (otherwise a restart locks them out) */
+rep('no-company login', "if (!S.companies.some(c => c.members.some(m => m.user === u.id))) {", "if (S.companies.length && !S.companies.some(c => c.members.some(m => m.user === u.id))) {");
+rep('no-company cur', "S.cur = S.companies.find(x => x.members.some(m => m.user === u.id)).id;", "{ const _mc = S.companies.find(x => x.members.some(m => m.user === u.id)); if (_mc) S.cur = _mc.id; }");
 /* 6c. Users tab: invited state, resend, invite wording */
 rep('user status', "const st = u.status === 'ACTIVE' ? '<span class=\"zst zgood\">Active</span>' : '<span class=\"zst zwarn\">Disabled</span>';", "const st = u.status === 'ACTIVE' ? '<span class=\"zst zgood\">Active</span>' : u.status === 'INVITED' ? '<span class=\"zst zwarn\">Invited</span>' : '<span class=\"zst zwarn\">Disabled</span>';");
 rep('resend btn', '<button class="btn sm" data-act="userReset" data-id="${u.id}">Reset password</button>', '${u.status === \'INVITED\' ? `<button class="btn sm" data-act="userResend" data-id="${u.id}">Resend invite</button>` : `<button class="btn sm" data-act="userReset" data-id="${u.id}">Reset password</button>`}');
