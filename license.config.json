@@ -1,4 +1,4 @@
-{
-  "serverUrl": "http://localhost:8080",
-  "publicKey": "MCowBQYDK2VwAyEAg9/hb+Y0QPWJAQm+6jLJRXo8OJNDcUc3+EpbYgLi44o="
-}
+   {
+     "serverUrl": "http://localhost:8080",
+     "publicKey": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAg9/hb+Y0QPWJAQm+6jLJRXo8OJNDcUc3+EpbYgLi44o=\n-----END PUBLIC KEY-----"
+   }
