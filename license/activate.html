@@ -1,0 +1,70 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Activate BrandVerse Books</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:">
+<style>
+:root{--m:#b3187d;--p:#6d1a8f}*{box-sizing:border-box}
+body{margin:0;font:14px/1.5 "Segoe UI",system-ui,Arial,sans-serif;color:#2a1f29;background:#fff}
+header{background:linear-gradient(135deg,var(--m),var(--p));color:#fff;padding:26px 32px}
+header h1{margin:0;font-size:22px}header p{margin:4px 0 0;opacity:.9}
+main{padding:26px 32px}
+label{display:block;font-weight:600;margin-bottom:6px}
+input{width:100%;font:600 18px Consolas,monospace;letter-spacing:2px;text-transform:uppercase;padding:12px 14px;border:1.5px solid #d9c3d4;border-radius:10px}
+input:focus{outline:none;border-color:var(--m);box-shadow:0 0 0 3px rgba(179,24,125,.15)}
+button{font:inherit;font-weight:600;border-radius:10px;padding:11px 20px;cursor:pointer;border:1.5px solid #d9c3d4;background:#fff}
+button.pri{background:var(--m);border-color:var(--m);color:#fff}button:disabled{opacity:.6;cursor:wait}
+.row{display:flex;gap:10px;margin-top:18px;align-items:center}.sp{flex:1}
+.err{background:#fde7e5;color:#9b1c13;border-radius:10px;padding:10px 14px;margin:0 0 16px}
+.warn{background:#fff3dc;color:#8a5200;border-radius:10px;padding:10px 14px;margin:0 0 16px}
+.ok{background:#e3f6ee;color:#0d6b4a;border-radius:10px;padding:10px 14px;margin-top:14px}
+.hint{color:#7b6a78;font-size:12.5px;margin-top:14px}
+</style></head><body>
+<header><h1>Activate BrandVerse Books</h1><p>Enter the licence key you received from J Sign Consultancy.</p></header>
+<main>
+  <div id="why"></div>
+  <label for="key">Licence key</label>
+  <input id="key" placeholder="BVB-XXXX-XXXX-XXXX-XXXX" maxlength="23" autofocus autocomplete="off" spellcheck="false">
+  <div id="msg"></div>
+  <div class="row"><button id="quit">Exit</button><span class="sp"></span><button class="pri" id="go">Activate</button></div>
+  <div class="hint" id="hint"></div>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const WHY = {
+  not_activated: '', expired: ['warn', 'Your licence has expired. Ask your provider to renew it, then press Activate again.'],
+  offline_too_long: ['warn', 'This computer has not been able to reach the licence server for too long. Connect to the internet and press Activate.'],
+  clock: ['warn', 'The computer clock looks wrong. Correct the date and time, connect to the internet, then press Activate.'],
+  other_machine: ['err', 'This licence was activated on a different computer. Enter your key to activate this one.'],
+  tampered: ['err', 'The saved licence could not be verified. Enter your key to activate again.'],
+  revoked: ['err', 'This licence has been disabled by your provider. Please contact them.']
+};
+const ERR = {
+  invalid: 'That licence key was not recognised. Check it and try again.',
+  revoked: 'This licence has been disabled. Please contact your provider.',
+  expired: 'This licence has expired. Please contact your provider to renew.',
+  device_limit: 'This licence is already activated on the maximum number of computers. Ask your provider to free one, or use Settings > Licence > Deactivate on the old computer.',
+  offline: 'Could not reach the licence server. Check your internet connection and try again.',
+  rate_limited: 'Too many attempts. Please wait a few minutes.',
+  bad_response: 'The server response could not be verified. Please try again.',
+  not_configured: 'This build has no licence server configured.'
+};
+window.activation.info().then(i => {
+  const w = WHY[i.reason]; if (w) $('#why').innerHTML = `<div class="${w[0]}">${w[1]}</div>`;
+  $('#hint').textContent = 'This computer: ' + i.machine + (i.support ? ' · ' + i.support : '');
+});
+const k = $('#key');
+k.addEventListener('input', () => {
+  let v = k.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (v.startsWith('BVB')) v = v.slice(3);
+  v = v.slice(0, 16); const parts = v.match(/.{1,4}/g) || [];
+  k.value = parts.length ? 'BVB-' + parts.join('-') : '';
+});
+async function go() {
+  const key = k.value; if (key.length < 23) { $('#msg').innerHTML = '<div class="err" style="margin-top:14px">Enter the full key (BVB-XXXX-XXXX-XXXX-XXXX).</div>'; return; }
+  $('#go').disabled = true; $('#go').textContent = 'Activating…'; $('#msg').innerHTML = '';
+  const r = await window.activation.activate(key);
+  if (!r.ok) { $('#go').disabled = false; $('#go').textContent = 'Activate'; $('#msg').innerHTML = `<div class="err" style="margin-top:14px">${ERR[r.error] || 'Activation failed (' + (r.error || 'unknown') + ').'}</div>`; }
+  else $('#msg').innerHTML = '<div class="ok">Activated. Starting…</div>';
+}
+$('#go').onclick = go; k.onkeydown = e => { if (e.key === 'Enter') go(); };
+$('#quit').onclick = () => window.activation.quit();
+</script></body></html>

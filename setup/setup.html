@@ -1,0 +1,35 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>BrandVerse Books - Setup</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:">
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Segoe UI,Arial,sans-serif;color:#1d1b1a;background:#fff}
+header{background:#1d1b1a;color:#e9c46a;padding:22px 28px}header h1{margin:0;font-size:22px}header p{margin:4px 0 0;color:#cfc8bd;font-size:13px}
+main{padding:22px 28px}p.lead{margin:0 0 16px;color:#444;font-size:14px;line-height:1.5}
+.f{margin-bottom:14px}.f label{display:block;font-weight:600;font-size:13px;margin-bottom:4px}.f small{display:block;color:#777;margin-top:3px}
+.r{display:flex;gap:8px}.r input{flex:1;padding:9px 10px;border:1px solid #bbb;border-radius:6px;font-size:13px}
+button{padding:9px 14px;border:1px solid #bbb;background:#f4f2ef;border-radius:6px;cursor:pointer;font-size:13px}
+button.p{background:#b8860b;color:#fff;border-color:#b8860b;font-weight:600}button.p:hover{background:#9a6f08}
+.err{color:#b00020;font-size:13px;min-height:18px;margin:6px 0}
+footer{display:flex;justify-content:space-between;padding:0 28px 24px}
+</style></head><body>
+<header><h1>Welcome to BrandVerse Books</h1><p>Choose where your company data is kept on this computer</p></header>
+<main>
+<p class="lead">All your books, exports and backups are stored locally in the folders below. You can change them later from Settings.</p>
+<div class="f"><label>Data folder</label><div class="r"><input id="data"><button data-k="data">Browse…</button></div><small>Your company data file lives here.</small></div>
+<div class="f"><label>Exports folder</label><div class="r"><input id="exports"><button data-k="exports">Browse…</button></div><small>Excel, PDF and CSV files you export are saved here.</small></div>
+<div class="f"><label>Backups folder</label><div class="r"><input id="backups"><button data-k="backups">Browse…</button></div><small>An automatic daily backup is kept here (latest 30).</small></div>
+<div class="err" id="err"></div>
+</main>
+<footer><button id="cancel">Cancel</button><button class="p" id="go">Create folders and start</button></footer>
+<script>
+const $=id=>document.getElementById(id);
+bvSetup.defaults().then(d=>{$('data').value=d.dataDir;$('exports').value=d.exportsDir;$('backups').value=d.backupsDir;});
+document.querySelectorAll('button[data-k]').forEach(b=>b.onclick=async()=>{const k=b.dataset.k;const p=await bvSetup.browse($(k).value);if(p)$(k).value=p;});
+$('cancel').onclick=()=>bvSetup.cancel();
+$('go').onclick=async()=>{
+  $('err').textContent='';
+  const c={dataDir:$('data').value.trim(),exportsDir:$('exports').value.trim(),backupsDir:$('backups').value.trim()};
+  if(!c.dataDir||!c.exportsDir||!c.backupsDir){$('err').textContent='Please choose all three folders.';return;}
+  const r=await bvSetup.finish(c); if(!r.ok)$('err').textContent=r.error;
+};
+</script></body></html>
