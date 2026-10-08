@@ -8,7 +8,7 @@
   "scripts": {
     "prepare-app": "node scripts/prepare-app.js",
     "start": "npm run prepare-app && electron .",
-    "dist": "npm run prepare-app && electron-builder --win nsis",
+    "dist": "npm run prepare-app && electron-builder --win nsis --publish never",
     "dist:dir": "npm run prepare-app && electron-builder --win dir",
     "configure-licensing": "node scripts/configure-licensing.js"
   },
